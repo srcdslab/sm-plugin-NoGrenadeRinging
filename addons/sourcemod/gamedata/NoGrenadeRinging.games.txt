@@ -18,9 +18,9 @@
 		{
 			"OnDamagedByExplosion"
 			{
-				"windows"	"375"
-				"linux"		"376"
-				"mac"		"376"
+				"windows"	"376"
+				"linux"		"377"
+				"mac"		"377"
 			}
 		}
 	}
