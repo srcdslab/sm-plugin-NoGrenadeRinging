@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name			= "NoGrenadeRinging",
 	author			= "BotoX",
 	description		= "Block the annoying ringing noise when a grenade explodes next to you",
-	version			= "1.0.1",
+	version			= "1.1.0",
 	url				= ""
 };
 
