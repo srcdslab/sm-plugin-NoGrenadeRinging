@@ -7,8 +7,7 @@ This repository contains a SourceMod plugin for Source engine games (CS:GO, CS:S
 ### Key Files
 - `addons/sourcemod/scripting/NoGrenadeRinging.sp` - Main plugin source code
 - `addons/sourcemod/gamedata/NoGrenadeRinging.games.txt` - Game-specific offsets for CS:GO and CS:S
-- `sourceknight.yaml` - Build configuration for SourceKnight build system
-- `.github/workflows/ci.yml` - CI/CD pipeline configuration
+- `.github/workflows/ci.yml` - CI/CD pipeline configuration (native GitHub Actions, using spcomp directly)
 
 ## Technical Environment
 
@@ -16,7 +15,7 @@ This repository contains a SourceMod plugin for Source engine games (CS:GO, CS:S
 - **Language**: SourcePawn (SourceMod's scripting language)
 - **Platform**: SourceMod 1.11.0+ (currently using 1.11.0-git6934)
 - **Target Games**: Counter-Strike: Global Offensive, Counter-Strike: Source
-- **Build System**: SourceKnight 0.2 (not direct spcomp compilation)
+- **Build System**: Native GitHub Actions workflow using `rumblefrog/setup-sp` and direct `spcomp` compilation
 
 ### Dependencies
 - SourceMod API (automatically included)
@@ -25,27 +24,26 @@ This repository contains a SourceMod plugin for Source engine games (CS:GO, CS:S
 
 ## Build System
 
-### SourceKnight Configuration
-This repository uses SourceKnight instead of direct SourcePawn compiler (spcomp). Key configuration in `sourceknight.yaml`:
+### GitHub Actions Configuration
+This repository builds directly with the SourcePawn compiler (spcomp) via `rumblefrog/setup-sp`. Key configuration in `.github/workflows/ci.yml`:
 
 ```yaml
-project:
-  sourceknight: 0.2
-  name: NoGrenadeRinging
-  dependencies:
-    - name: sourcemod
-      type: tar
-      version: 1.11.0-git6934
-      location: https://sm.alliedmods.net/smdrop/1.11/sourcemod-1.11.0-git6934-linux.tar.gz
-  root: /
-  output: /addons/sourcemod/plugins
-  targets:
-    - NoGrenadeRinging
+- name: Setup SourcePawn compiler
+  uses: rumblefrog/setup-sp@v1.3.1
+  with:
+    version: "1.12.x"
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Build sourcemod plugin
+  working-directory: addons/sourcemod/scripting
+  run: |
+    mkdir -p ../plugins
+    spcomp -o ../plugins/NoGrenadeRinging.smx NoGrenadeRinging.sp
 ```
 
 ### Build Commands
-- **Local Build**: Use SourceKnight CLI or GitHub Actions
-- **CI Build**: GitHub Actions automatically builds on push/PR using `maxime1907/action-sourceknight@v1`
+- **Local Build**: Run `spcomp` directly against `NoGrenadeRinging.sp` with the SourceMod include path
+- **CI Build**: GitHub Actions automatically builds on push/PR using `rumblefrog/setup-sp`
 - **Output**: Compiled `.smx` files in `/addons/sourcemod/plugins/`
 
 ### Artifact Structure
@@ -221,7 +219,7 @@ This repository doesn't have automated tests. For manual testing:
 ### Manual Testing Process
 ```bash
 # 1. Build the plugin
-# Use GitHub Actions or SourceKnight locally
+# Use GitHub Actions or run spcomp locally
 
 # 2. Deploy to test server
 # Copy .smx to addons/sourcemod/plugins/
@@ -241,7 +239,7 @@ sm_dump_handles  # Check for handle leaks
 
 ### GitHub Actions Workflow
 - **Trigger**: Push, PR, or manual dispatch
-- **Build**: Uses SourceKnight action to compile plugin
+- **Build**: Uses `rumblefrog/setup-sp` and `spcomp` to compile plugin
 - **Package**: Creates release artifacts with proper directory structure
 - **Release**: Automatic releases on tags or main branch pushes
 
